@@ -1,1 +1,1 @@
-# rust_recap
+# Daemon accepting commands and passing them to workers
