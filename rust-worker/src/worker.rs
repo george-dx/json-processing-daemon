@@ -12,7 +12,10 @@ impl Worker {
     pub async fn process(&self) -> Result<(), reqwest::Error> {
         println!("Fetching data from: {}", self.data_source);
         let data = fetch_data(&self.data_source).await?;
-        println!("Received data: {:?}", data);
+        println!("Received {} monarchs:", data.len());
+        for monarch in data {
+            println!("{} ({}) - {}", monarch.Name, monarch.House, monarch.Reign);
+        }
         Ok(())
     }
 }

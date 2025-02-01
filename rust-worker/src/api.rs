@@ -1,13 +1,10 @@
-use reqwest::Error;
-use serde::Deserialize;
+use crate::models::Monarch;
 
-#[derive(Debug, Deserialize)]
-pub struct ApiRespose {
-    pub data: String
-}
-
-pub async fn fetch_data(url: &str) -> Result<ApiRespose, Error> {
-    let response = reqwest::get(url).await?.json::<ApiRespose>().await?;
-    Ok(response)
+pub async fn fetch_data(url: &str) -> Result<Vec<Monarch>, reqwest::Error> {
+    let response = reqwest::get(url).await?;
+    let raw_response = response.text().await?; // Get the raw response as a string
+    println!("Raw API response: {}", raw_response); // Log the raw response
+    let data: Vec<Monarch> = serde_json::from_str(&raw_response).unwrap(); // Parse the JSON
+    Ok(data)
 }
 

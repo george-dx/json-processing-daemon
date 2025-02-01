@@ -1,7 +1,5 @@
 mod worker;
 mod api;
-mod command;
-mod oracle;
 mod models;
 
 use worker::Worker;
