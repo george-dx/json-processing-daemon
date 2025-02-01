@@ -7,4 +7,3 @@ pub async fn fetch_data(url: &str) -> Result<Vec<Monarch>, reqwest::Error> {
     let data: Vec<Monarch> = serde_json::from_str(&raw_response).unwrap(); // Parse the JSON
     Ok(data)
 }
-

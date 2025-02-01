@@ -1,4 +1,5 @@
 use crate::api::fetch_data;
+use crate::models::ApiUrl;
 use crate::traits::DataProcessor;
 
 pub struct Worker<T> {
@@ -7,17 +8,17 @@ pub struct Worker<T> {
 
 impl<T> Worker<T> {
     pub fn new(data_source: T) -> Self {
-        Worker {data_source}
+        Worker { data_source }
     }
 }
 
-impl DataProcessor for Worker<String> {
+impl DataProcessor for Worker<ApiUrl> {
     fn description(&self) -> String {
         format!("Worker with data source: {}", self.data_source)
     }
     async fn process(&self) -> Result<(), reqwest::Error> {
         println!("Fetching data from: {}", self.data_source);
-        let data = fetch_data(&self.data_source).await?;
+        let data = fetch_data(&self.data_source.to_string()).await?;
         println!("Received {} monarchs:", data.len());
         for monarch in data {
             println!("{} ({}) - {}", monarch.Name, monarch.House, monarch.Reign);
@@ -26,23 +27,22 @@ impl DataProcessor for Worker<String> {
     }
 }
 
-impl<T> Worker<T> where T: AsRef<str>, {
+impl<T> Worker<T>
+where
+    T: AsRef<str>,
+{
     pub fn display_data_source(&self) {
         println!("Data source: {}", self.data_source.as_ref());
     }
 }
 
-impl<T> Worker<T> where T: Default,
+impl<T> Worker<T>
+where
+    T: Default,
 {
     pub fn default_worker() -> Self {
         Worker {
             data_source: T::default(),
         }
-    }
-}
-
-impl Default for String {
-    fn default() -> Self {
-        "https://mysafeinfo.com/api/data?list=englishmonarchs&format=json".to_string()
     }
 }
