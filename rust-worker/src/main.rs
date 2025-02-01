@@ -6,20 +6,26 @@ mod worker;
 use crate::models::ApiUrl;
 use crate::traits::DataProcessor;
 use worker::Worker;
+use crate::worker::DataType;
 
 #[tokio::main]
 async fn main() {
-    let worker = Worker::new(ApiUrl::new(
-        "https://mysafeinfo.com/api/data?list=englishmonarchs&format=json".to_string(),
-    ));
+    let monarch_worker = Worker::new(
+        ApiUrl::new("https://mysafeinfo.com/api/data?list=englishmonarchs&format=json".to_string()),
+        DataType::Monarch,
+    );
 
-    println!("{}", worker.description());
-    if let Err(e) = worker.process().await {
+    let president_worker = Worker::new(ApiUrl::new("https://mysafeinfo.com/api/data?list=presidents&format=json".to_string()),
+    DataType::President,);
+
+    println!("{}", monarch_worker.description());
+    if let Err(e) = monarch_worker.process().await {
         eprintln!("Error: {}", e);
     }
 
-    worker.display_data_source();
-
-    let default_worker: Worker<ApiUrl> = Worker::default_worker();
-    println!("Default worker data source: {}", default_worker.data_source);
+    // Use the DataProcessor trait for presidents
+    println!("{}", president_worker.description());
+    if let Err(e) = president_worker.process().await {
+        eprintln!("Error: {}", e);
+    }
 }

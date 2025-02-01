@@ -1,48 +1,47 @@
 use crate::api::fetch_data;
-use crate::models::ApiUrl;
+use crate::models::{ApiUrl, Monarch, President};
 use crate::traits::DataProcessor;
 
-pub struct Worker<T> {
-    pub data_source: T,
+pub enum DataType {
+    Monarch,
+    President,
+}
+pub struct Worker {
+    pub data_source: ApiUrl,
+    pub data_type: DataType,
 }
 
-impl<T> Worker<T> {
-    pub fn new(data_source: T) -> Self {
-        Worker { data_source }
+impl Worker {
+    pub fn new(data_source: ApiUrl, data_type: DataType) -> Self {
+        Worker { data_source, data_type }
     }
 }
 
-impl DataProcessor for Worker<ApiUrl> {
+impl DataProcessor for Worker{
     fn description(&self) -> String {
         format!("Worker with data source: {}", self.data_source)
     }
     async fn process(&self) -> Result<(), reqwest::Error> {
         println!("Fetching data from: {}", self.data_source);
-        let data = fetch_data(&self.data_source.to_string()).await?;
-        println!("Received {} monarchs:", data.len());
-        for monarch in data {
-            println!("{} ({}) - {}", monarch.Name, monarch.House, monarch.Reign);
+        match self.data_type {
+            DataType::Monarch => {
+                let data = fetch_data::<Monarch>(&self.data_source.to_string()).await?;
+                println!("Received {} monarchs:", data.len());
+                for monarch in data {
+                    println!("{} ({}) - {}", monarch.Name.unwrap_or_else(|| "Unknown".to_string()), monarch.House.unwrap_or_else(|| "Unknown".to_string()),
+                    monarch.Reign.unwrap_or_else(|| "Unknown".to_string()));
+                }
+            }
+            DataType::President => {
+                let data = fetch_data::<President>(&self.data_source.to_string()).await?;
+                println!("Received {} presidents:", data.len());
+                for president in data {
+                    println!("{} ({}) - {}", president.FullName.unwrap_or_else(|| "Unknown".to_string()),
+                    president.Party.unwrap_or_else(|| "Unknown".to_string()),
+                    president.Terms.unwrap_or_else(|| "Unknown".to_string()));
+                }
+            }
         }
         Ok(())
-    }
-}
-
-impl<T> Worker<T>
-where
-    T: AsRef<str>,
-{
-    pub fn display_data_source(&self) {
-        println!("Data source: {}", self.data_source.as_ref());
-    }
-}
-
-impl<T> Worker<T>
-where
-    T: Default,
-{
-    pub fn default_worker() -> Self {
-        Worker {
-            data_source: T::default(),
-        }
     }
 }

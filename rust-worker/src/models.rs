@@ -30,9 +30,18 @@ impl AsRef<str> for ApiUrl {
 
 #[derive(Debug, Deserialize)]
 pub struct Monarch {
-    pub Name: String,
-    pub Country: String,
-    pub House: String,
-    pub Reign: String,
-    pub ID: u32,
+    pub Name: Option<String>,
+    pub Country: Option<String>,
+    pub House: Option<String>,
+    pub Reign: Option<String>,
+    pub ID: Option<u32>,
+}
+
+#[derive(Debug, Deserialize)]
+pub struct President {
+    pub President: Option<u32>,
+    pub ID: Option<u32>,
+    pub FullName: Option<String>,
+    pub Party: Option<String>,
+    pub Terms: Option<String>,
 }
